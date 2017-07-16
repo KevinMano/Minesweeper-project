@@ -5,4 +5,6 @@ My_Minesweeper
 This program implements a graphical version of the classic minesweeper game
 '''
 
-def 
+class Minesweeper_board:
+  def __init__(self, mine_num):
+    
