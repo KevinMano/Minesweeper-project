@@ -35,13 +35,13 @@ Basically, this means to reference both arrays, and return the appropriate resul
 #Minesweeper_board class, containing the methods and attributes for the board.
 class Minesweeper_board:
     MineCount = 0
-    MoveCount = 0 
+    MoveCount = 0
 
     #Initial screen, hit start to populate the board.
     def __init__(self, master, mines_no):
         Minesweeper_board.MineCount = mines_no
         State_array = []
-        Main_frame = Frame(master, width=576, height=768)
+        Main_frame = Frame(master, width=405, height=300)
         Main_frame.pack()
         self.start_button = Button(Main_frame, text='START', width=25, command = lambda: self.draw(Main_window,State_array))
         self.start_button.pack()
@@ -50,39 +50,53 @@ class Minesweeper_board:
     #This function simply sets up the whole board, starts the timer. After the first press, the populate function occurs.
     #After that, this function continues with the populate. 
     def draw(self,master,State_array):
-        self.start_button.destroy()
-        if self.MoveCount < 1:
+        self.start_button.forget()
+        if Minesweeper_board.MoveCount < 1:
             State_array = [[0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0]]
-            self.button = [[0 for columns in range(8)] for rows in range(8)]
-            for rows in range(0,8):
-                for columns in range(0,8):
-                    self.button[rows][columns] = Button(Main_window, text="", width=5, command=lambda i=rows, j=columns: self.populate(Main_window,State_array,i,j))
-                    self.button[rows][columns].grid(row=rows, column=columns)
-            self.MoveCount += 1
-            print self.MoveCount
+            self.button = [[0 for columns in range(9)] for rows in range(9)]
+            for rows in range(1,10):
+                for columns in range(1,10):
+                    self.button[rows-1][columns-1] = Button(Main_window, width=5, command=lambda i=rows-1, j=columns-1: self.populate(Main_window,State_array,i,j) )
+                    self.button[rows-1][columns-1].grid(row=rows-1, column=columns-1)
+            Minesweeper_board.MoveCount += 1
+            print Minesweeper_board.MoveCount
         else:
             print "We made it here instead, still really good!"
-            self.MoveCount += 1
-            print self.MoveCount
+            #self.uncover(State_array, )
+            Minesweeper_board.MoveCount += 1
+            print Minesweeper_board.MoveCount
     
-    #create the mines and populate the state array, mines are given an X, the cells around the mines need to be populated now too.
-    #Remember, the first cell that is clicked cannot have a mine.
+    '''create the mines and populate the state array, mines are given an X, the cells around the mines need to be populated now too.
+    Remember, the first cell that is clicked cannot have a mine.
+    We shall make the State_array contain which cells contain mines, and which ones have the mine.
+    So mines shall be given the integer vaariable 99 in State_array. 
+    '''        
     def populate(self, master, State_array,row,column):
-        self.button[row][column].config(relief = SUNKEN)
-        Mine_count_temp = Minesweeper_board.MineCount                      
-        for each in range(0,9,1):
+        cell_status = IntVar()
+        cell_status.set(0)
+        self.button[row][column].config(relief = SUNKEN, state = DISABLED, textvariable = cell_status)
+        Mine_count_temp = Minesweeper_board.MineCount
+        iter_count = 1
+        while (iter_count < 10):
             mine_row = random.randint(0,8)
             mine_column = random.randint(0,8)
-            State_array[mine_row][mine_column] = 1
-            New_mine = Mine(mine_row+1, mine_column+1)
-            Mine_count_temp = Mine_count_temp - 1
+            if(mine_row != row | mine_column != column):
+                State_array[mine_row][mine_column] = 99      
+                New_mine = Mine(mine_row+1, mine_column+1)
+                neighbouring_cells = [[row-1,column-1],[row-1,column],[row-1,column+1],[row, column-1],[row,column+1],[row+1,column-1],[row+1,column],[row+1,column+1]]
+                for iter2 in range(0,8):
+                    State_array[x_coord][y_coord] += 1
+                Mine_count_temp = Mine_count_temp - 1
+                iter_count += 1
         print State_array
-        self.button[row][column].set()
+        #Now we have to visit all the neighbours of the cell containing mines, and update them. Just visit all the neighbours, and add 1 to their State_array values.
+        #We create an array, populate it with the neighbours, and run a for loop and increment them by 1.
 
     #Uncover the button, and do the check based on the logic above.
-    def Uncover(self, State_array, row, column):
-        print "We made it here!"
-
+    def uncover(self, State_array, row, column):
+        self.button[row][column].config(relief = SUNKEN, state = DISABLED, textvariable = cell_status)
+        if(State_array[row][column] == 99):
+            print "KABOOM!"
         
 #Mine class
 class Mine:
@@ -91,7 +105,7 @@ class Mine:
 
 Main_window = Tk()
 Main_window.title("Minesweeper")
-Main_window.geometry("600x700")
+Main_window.geometry("405x300")
 Main_window.configure(background = 'grey')
 New_Game = Minesweeper_board(Main_window, 10)        
 Main_window.mainloop()    
